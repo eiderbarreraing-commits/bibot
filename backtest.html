@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Sistema de Backtesting
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{% if category == 'error' %}danger{% elif category == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Backtesting Form -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <form method="POST" action="{{ url_for('run_backtest') }}" id="backtestForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="symbol" class="form-label">
+                                                <i class="fas fa-coins me-1"></i>Par de Trading
+                                            </label>
+                                            <select class="form-select" id="symbol" name="symbol" required>
+                                                <option value="PEPEUSDT">PEPE/USDT</option>
+                                                <option value="BTCUSDT">BTC/USDT</option>
+                                                <option value="ETHUSDT">ETH/USDT</option>
+                                                <option value="ADAUSDT">ADA/USDT</option>
+                                                <option value="DOGEUSDT">DOGE/USDT</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="days" class="form-label">
+                                                <i class="fas fa-calendar me-1"></i>Período (días)
+                                            </label>
+                                            <select class="form-select" id="days" name="days">
+                                                <option value="7">7 días</option>
+                                                <option value="15">15 días</option>
+                                                <option value="30" selected>30 días</option>
+                                                <option value="60">60 días</option>
+                                                <option value="90">90 días</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="runBacktestBtn">
+                                    <i class="fas fa-play me-2"></i>Ejecutar Backtesting
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-info-circle fa-2x text-info mb-2"></i>
+                                    <h5 class="card-title">¿Qué es el Backtesting?</h5>
+                                    <p class="card-text small">
+                                        Prueba tu estrategia de trading con datos históricos para ver 
+                                        cómo habría funcionado en el pasado.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if results %}
+                    <!-- Results Section -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-chart-bar me-2"></i>Resultados del Backtesting
+                            </h5>
+                        </div>
+                    </div>
+
+                    <!-- Performance Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card {% if results.total_return > 0 %}border-success{% else %}border-danger{% endif %}">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-percentage fa-2x {% if results.total_return > 0 %}text-success{% else %}text-danger{% endif %} mb-2"></i>
+                                    <h4 class="{% if results.total_return > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ "%.2f"|format(results.total_return) }}%
+                                    </h4>
+                                    <p class="text-muted mb-0">Retorno Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                                    <h4 class="text-primary">${{ "%.2f"|format(results.final_balance) }}</h4>
+                                    <p class="text-muted mb-0">Balance Final</p>
+                                    <small class="text-muted">Inicial: ${{ "%.2f"|format(results.initial_balance) }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-exchange-alt fa-2x text-warning mb-2"></i>
+                                    <h4 class="text-primary">{{ results.total_trades }}</h4>
+                                    <p class="text-muted mb-0">Total Trades</p>
+                                    <small class="text-success">✓{{ results.winning_trades }}</small>
+                                    <small class="text-danger ms-2">✗{{ results.losing_trades }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-target fa-2x text-primary mb-2"></i>
+                                    <h4 class="text-primary">{{ "%.1f"|format(results.win_rate) }}%</h4>
+                                    <p class="text-muted mb-0">Tasa de Éxito</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Métricas de Rendimiento</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="mb-2">
+                                                <strong>Profit Promedio:</strong>
+                                                <span class="float-end">${{ "%.2f"|format(results.avg_profit) }}</span>
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Max Drawdown:</strong>
+                                                <span class="float-end text-danger">{{ "%.2f"|format(results.max_drawdown) }}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="mb-2">
+                                                <strong>Sharpe Ratio:</strong>
+                                                <span class="float-end">{{ "%.2f"|format(results.sharpe_ratio) }}</span>
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Período:</strong>
+                                                <span class="float-end">{{ results.period }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Información de Señales</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>Señales Generadas:</strong>
+                                        <span class="float-end">{{ results.signals_generated }}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Señales Ejecutadas:</strong>
+                                        <span class="float-end">{{ results.executed_signals }}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Tasa de Ejecución:</strong>
+                                        <span class="float-end">
+                                            {% if results.signals_generated > 0 %}
+                                                {{ "%.1f"|format((results.executed_signals / results.signals_generated) * 100) }}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Trades -->
+                    {% if results.trades %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Últimos Trades ({{ results.trades|length }})</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Entrada</th>
+                                                    <th>Salida</th>
+                                                    <th>Precio Entrada</th>
+                                                    <th>Precio Salida</th>
+                                                    <th>Duración</th>
+                                                    <th>Profit %</th>
+                                                    <th>Motivo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for trade in results.trades %}
+                                                <tr>
+                                                    <td>{{ trade.entry_time.strftime('%m/%d %H:%M') }}</td>
+                                                    <td>{{ trade.exit_time.strftime('%m/%d %H:%M') }}</td>
+                                                    <td>${{ "%.6f"|format(trade.entry_price) }}</td>
+                                                    <td>${{ "%.6f"|format(trade.exit_price) }}</td>
+                                                    <td>{{ "%.1f"|format(trade.duration) }}h</td>
+                                                    <td class="{% if trade.profit_pct > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                        {{ "%.2f"|format(trade.profit_pct) }}%
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary small">{{ trade.exit_reason }}</span>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('backtestForm').addEventListener('submit', function(e) {
+    const button = document.getElementById('runBacktestBtn');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Ejecutando...';
+});
+</script>
+{% endblock %}

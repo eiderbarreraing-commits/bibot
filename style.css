@@ -1,0 +1,310 @@
+/* Custom styles for the advanced trading bot interface */
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    border-radius: 12px;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Professional Gradient Cards */
+.gradient-card-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+}
+
+.gradient-card-info {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+}
+
+.gradient-card-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.3);
+}
+
+.gradient-card-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
+}
+
+.gradient-card-success .text-primary,
+.gradient-card-info .text-primary,
+.gradient-card-warning .text-primary,
+.gradient-card-danger .text-primary {
+    color: white !important;
+}
+
+/* Card Icons */
+.card-icon {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    opacity: 0.3;
+}
+
+.gradient-card-success .card-body,
+.gradient-card-info .card-body,
+.gradient-card-warning .card-body,
+.gradient-card-danger .card-body {
+    position: relative;
+    overflow: hidden;
+}
+
+/* AI Insights Styling */
+.ai-insight-item {
+    padding: 8px 0;
+}
+
+.insight-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.ai-recommendation {
+    border-left: 4px solid #007bff;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { border-left-color: #007bff; }
+    50% { border-left-color: #0056b3; }
+    100% { border-left-color: #007bff; }
+}
+
+/* Progress Bar Enhancements */
+.progress {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.8s ease-in-out;
+    border-radius: 10px;
+}
+
+/* Chart Container */
+#performanceChart {
+    border-radius: 8px;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875em;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+pre {
+    font-size: 0.875em;
+}
+
+code {
+    background-color: var(--bs-secondary);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.text-success {
+    color: var(--bs-success) !important;
+}
+
+.text-danger {
+    color: var(--bs-danger) !important;
+}
+
+.bg-secondary {
+    background-color: var(--bs-secondary) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875em;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Status indicators */
+.fas.fa-circle {
+    font-size: 0.5em;
+    vertical-align: middle;
+}
+
+/* Button Animations */
+.btn:hover .fa-refresh {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.btn-group .btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-group .btn:hover {
+    transform: scale(1.05);
+}
+
+.btn-group .btn.active {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Advanced Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Real-time Data Pulse */
+.badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Success Rate Ring Animation */
+.success-rate-ring {
+    position: relative;
+    display: inline-block;
+}
+
+.success-rate-ring::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 2px solid #28a745;
+    border-radius: 50%;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Enhanced Table Styling */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 15px;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    transform: scale(1.01);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .gradient-card-success,
+    .gradient-card-info,
+    .gradient-card-warning,
+    .gradient-card-danger {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-icon {
+        display: none;
+    }
+    
+    .btn-group {
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        font-size: 0.75rem;
+    }
+}

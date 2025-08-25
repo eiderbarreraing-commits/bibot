@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fab fa-telegram me-2"></i>Configurar Notificaciones de Telegram
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Instructions -->
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>Configuración de Telegram
+                        </h6>
+                        <p class="mb-0">
+                            Para recibir notificaciones automáticas de tus trades, configura las siguientes variables de entorno:
+                        </p>
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">Pasos para configurar:</h5>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <span class="badge bg-primary me-2">1</span>
+                                        Crear Bot en Telegram
+                                    </h6>
+                                    <ol>
+                                        <li>Abre Telegram y busca <strong>@BotFather</strong></li>
+                                        <li>Envía <code>/newbot</code></li>
+                                        <li>Sigue las instrucciones para crear tu bot</li>
+                                        <li>Copia el <strong>token</strong> que te proporciona</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <span class="badge bg-success me-2">2</span>
+                                        Obtener Chat ID
+                                    </h6>
+                                    <ol>
+                                        <li>Envía un mensaje a tu bot creado</li>
+                                        <li>Ve a: <code>https://api.telegram.org/bot[TU_TOKEN]/getUpdates</code></li>
+                                        <li>Busca el <strong>"chat":{"id":</strong> en la respuesta</li>
+                                        <li>Copia ese número (tu Chat ID)</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <span class="badge bg-warning me-2">3</span>
+                                        Configurar Variables de Entorno
+                                    </h6>
+                                    <p>Agrega estas variables a tu entorno:</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>
+                                            TELEGRAM_BOT_TOKEN=tu_token_aqui<br>
+                                            TELEGRAM_CHAT_ID=tu_chat_id_aqui
+                                        </code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Status -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Estado Actual:</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-robot fa-2x text-info me-3"></i>
+                                                <div>
+                                                    <h6 class="mb-1">Bot Token</h6>
+                                                    <span class="badge bg-secondary" id="botTokenStatus">
+                                                        No configurado
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-comments fa-2x text-primary me-3"></i>
+                                                <div>
+                                                    <h6 class="mb-1">Chat ID</h6>
+                                                    <span class="badge bg-secondary" id="chatIdStatus">
+                                                        No configurado
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Button -->
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <button class="btn btn-success me-3" onclick="testTelegramConnection()">
+                                <i class="fas fa-paper-plane me-2"></i>Probar Conexión
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Example Notifications -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Tipos de Notificaciones:</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="text-success">
+                                                <i class="fas fa-arrow-up me-2"></i>Compra Ejecutada
+                                            </h6>
+                                            <small class="text-muted">
+                                                Notificación cuando se ejecuta una orden de compra
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="text-warning">
+                                                <i class="fas fa-arrow-down me-2"></i>Venta Ejecutada
+                                            </h6>
+                                            <small class="text-muted">
+                                                Notificación cuando se ejecuta una orden de venta
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="card border-danger">
+                                        <div class="card-body">
+                                            <h6 class="text-danger">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>Errores del Sistema
+                                            </h6>
+                                            <small class="text-muted">
+                                                Notificación de errores críticos
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="text-info">
+                                                <i class="fas fa-info-circle me-2"></i>Estado del Bot
+                                            </h6>
+                                            <small class="text-muted">
+                                                Actualizaciones del estado del sistema
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="testingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Probando...</span>
+                </div>
+                <p class="mb-0">Enviando mensaje de prueba...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Check current Telegram status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkTelegramStatus();
+});
+
+function checkTelegramStatus() {
+    fetch('/api/system_status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.telegram_enabled) {
+                document.getElementById('botTokenStatus').textContent = 'Configurado';
+                document.getElementById('botTokenStatus').className = 'badge bg-success';
+                document.getElementById('chatIdStatus').textContent = 'Configurado';
+                document.getElementById('chatIdStatus').className = 'badge bg-success';
+            }
+        })
+        .catch(error => {
+            console.warn('Error checking Telegram status:', error);
+        });
+}
+
+function testTelegramConnection() {
+    // Show loading modal
+    const testingModal = new bootstrap.Modal(document.getElementById('testingModal'));
+    testingModal.show();
+    
+    // Send test message
+    fetch('/api/test_telegram', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            testingModal.hide();
+            
+            const alertType = data.success ? 'success' : 'danger';
+            const alertIcon = data.success ? 'check-circle' : 'exclamation-triangle';
+            
+            const alertHtml = `
+                <div class="alert alert-${alertType} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${alertIcon} me-2"></i>
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.querySelector('.card-body').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto-remove alert after 10 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 10000);
+        })
+        .catch(error => {
+            testingModal.hide();
+            console.error('Error testing Telegram:', error);
+            
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error probando la conexión de Telegram
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.querySelector('.card-body').insertAdjacentHTML('afterbegin', alertHtml);
+        });
+}
+</script>
+{% endblock %}

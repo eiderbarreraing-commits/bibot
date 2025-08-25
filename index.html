@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Performance Summary Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card gradient-card-success">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                </div>
+                <h3 class="text-primary mb-1" id="profit-display">$0.00</h3>
+                <p class="text-muted mb-0">Profit Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card gradient-card-info">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="fas fa-percentage fa-2x text-info"></i>
+                </div>
+                <h3 class="text-primary mb-1" id="success-rate">{{ "%.1f"|format((bot_status.successful_trades / bot_status.total_trades * 100) if bot_status.total_trades > 0 else 0) }}%</h3>
+                <p class="text-muted mb-0">Success Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card gradient-card-warning">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="fas fa-robot fa-2x text-warning"></i>
+                </div>
+                <h3 class="text-primary mb-1" id="ai-confidence">85%</h3>
+                <p class="text-muted mb-0">AI Confidence</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card gradient-card-danger">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="fas fa-shield-alt fa-2x text-danger"></i>
+                </div>
+                <h3 class="text-primary mb-1" id="risk-level">Bajo</h3>
+                <p class="text-muted mb-0">Risk Level</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Charts Row -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-area me-2"></i>Performance Analytics
+                </h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" onclick="switchChart('profit')">Profit</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="switchChart('trades')">Trades</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="switchChart('indicators')">Indicators</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-brain me-2"></i>AI Strategy Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="ai-insight-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="insight-label">RSI Signal Strength</span>
+                        <div class="progress flex-fill ms-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="rsi-strength" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-insight-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="insight-label">MACD Momentum</span>
+                        <div class="progress flex-fill ms-2" style="height: 8px;">
+                            <div class="progress-bar bg-info" id="macd-momentum" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-insight-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="insight-label">Volatility Risk</span>
+                        <div class="progress flex-fill ms-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning" id="volatility-risk" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="ai-recommendation p-3 bg-light rounded">
+                    <h6 class="text-primary mb-2">🤖 AI Recommendation</h6>
+                    <p class="mb-0 small" id="ai-recommendation">Analizando patrones del mercado...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bot Status Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-robot me-2"></i>Bot Status
+                </h5>
+                <span class="badge {% if bot_status.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if bot_status.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-primary">{{ bot_status.total_trades }}</h4>
+                        <small class="text-muted">Total Trades</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success">{{ bot_status.successful_trades }}</h4>
+                        <small class="text-muted">Successful</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-danger">{{ bot_status.failed_trades }}</h4>
+                        <small class="text-muted">Failed</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="fas fa-clock me-1"></i>Last Ping: 
+                        {% if bot_status.last_ping %}
+                            {{ bot_status.last_ping.strftime('%Y-%m-%d %H:%M:%S') }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="mt-3">
+                    <form method="POST" action="{{ url_for('toggle_bot') }}">
+                        <button type="submit" class="btn {% if bot_status.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} w-100">
+                            <i class="fas {% if bot_status.is_active %}fa-stop{% else %}fa-play{% endif %} me-2"></i>
+                            {% if bot_status.is_active %}Deactivate Bot{% else %}Activate Bot{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Status Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-link me-2"></i>Connection Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Binance API</span>
+                        <span class="badge {% if bot_ready %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if bot_ready %}Connected{% else %}Disconnected{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Webhook Endpoint</span>
+                        <span class="badge bg-info">Active</span>
+                    </div>
+                </div>
+                {% if binance_credentials %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Credentials</span>
+                        <span class="badge {% if binance_credentials.is_connected %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if binance_credentials.is_connected %}Ready{% else %}Configured{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('configure_binance') }}" class="btn {% if binance_credentials %}btn-outline-primary{% else %}btn-primary{% endif %} btn-sm">
+                        <i class="fas fa-key me-2"></i>
+                        {% if binance_credentials %}Update Credentials{% else %}Configure API{% endif %}
+                    </a>
+                    {% if binance_credentials and not bot_ready %}
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="testConnection()">
+                        <i class="fas fa-plug me-2"></i>Test Connection
+                    </button>
+                    {% endif %}
+                    <a href="{{ url_for('backtest_page') }}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-chart-line me-2"></i>Backtesting
+                    </a>
+                    <a href="{{ url_for('telegram_setup') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fab fa-telegram me-2"></i>Telegram Setup
+                    </a>
+                </div>
+                {% if not bot_ready and not binance_credentials %}
+                <div class="alert alert-warning mt-3 mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Configure your Binance API credentials to start trading.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Info Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-wallet me-2"></i>Account Info
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if account_info %}
+                <div class="mb-2">
+                    <small class="text-muted">USDT Balance:</small>
+                    <div class="h5 text-primary">
+                        {% for balance in account_info.balances %}
+                            {% if balance.asset == 'USDT' and balance.free|float > 0 %}
+                                ${{ "%.2f"|format(balance.free|float) }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">PEPE Balance:</small>
+                    <div class="h6">
+                        {% for balance in account_info.balances %}
+                            {% if balance.asset == 'PEPE' and balance.free|float > 0 %}
+                                {{ "{:,.0f}".format(balance.free|float) }} PEPE
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                    <p>Account information unavailable</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Webhook Information -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-webhook me-2"></i>Webhook Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Use the following endpoint to send trading signals:</p>
+                <div class="bg-secondary p-3 rounded">
+                    <code>POST /webhook</code>
+                </div>
+                <p class="mt-3 mb-2">Example payload for buy signal:</p>
+                <pre class="bg-secondary p-3 rounded"><code>{
+  "signal": "buy",
+  "symbol": "PEPEUSDT",
+  "amount": 5
+}</code></pre>
+                <p class="mt-3 mb-2">Example payload for sell signal:</p>
+                <pre class="bg-secondary p-3 rounded"><code>{
+  "signal": "sell",
+  "symbol": "PEPEUSDT"
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Trading Signals -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Trading Signals
+                </h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshSignals()">
+                    <i class="fas fa-refresh me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                {% if recent_signals %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Signal</th>
+                                <th>Symbol</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Order ID</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signals-table-body">
+                            {% for signal in recent_signals %}
+                            <tr>
+                                <td>{{ signal.timestamp.strftime('%m/%d %H:%M:%S') }}</td>
+                                <td>
+                                    <span class="badge {% if signal.signal_type == 'buy' %}bg-success{% elif signal.signal_type == 'sell' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ signal.signal_type.upper() }}
+                                    </span>
+                                </td>
+                                <td>{{ signal.symbol }}</td>
+                                <td>
+                                    {% if signal.amount %}
+                                        {% if signal.signal_type == 'buy' %}${% endif %}{{ signal.amount }}
+                                        {% if signal.signal_type == 'buy' %} USDT{% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge {% if signal.status == 'success' %}bg-success{% elif signal.status == 'error' %}bg-danger{% elif signal.status == 'processing' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ signal.status.upper() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if signal.order_id %}
+                                        <code class="small">{{ signal.order_id }}</code>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if signal.error_message %}
+                                        <span class="text-danger small" title="{{ signal.error_message }}">
+                                            {{ signal.error_message[:50] }}{% if signal.error_message|length > 50 %}...{% endif %}
+                                        </span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <p>No trading signals received yet</p>
+                    <p class="small">Send a POST request to the webhook endpoint to start trading</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Performance Chart Configuration
+let performanceChart;
+let currentChartType = 'profit';
+
+function initializeCharts() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Profit ($)',
+                data: [],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+    
+    updateChart();
+}
+
+function switchChart(type) {
+    currentChartType = type;
+    
+    // Update button states
+    document.querySelectorAll('.btn-group button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    updateChart();
+}
+
+function updateChart() {
+    // Simulated data - replace with real API calls
+    const labels = ['1h ago', '45m ago', '30m ago', '15m ago', 'Now'];
+    let data, label, color;
+    
+    switch(currentChartType) {
+        case 'profit':
+            data = [0, 2.5, 1.8, 4.2, 5.6];
+            label = 'Profit ($)';
+            color = '#28a745';
+            break;
+        case 'trades':
+            data = [0, 2, 4, 6, {{ bot_status.total_trades }}];
+            label = 'Total Trades';
+            color = '#007bff';
+            break;
+        case 'indicators':
+            data = [45, 52, 38, 42, 55];
+            label = 'RSI Value';
+            color = '#ffc107';
+            break;
+    }
+    
+    performanceChart.data.labels = labels;
+    performanceChart.data.datasets[0].data = data;
+    performanceChart.data.datasets[0].label = label;
+    performanceChart.data.datasets[0].borderColor = color;
+    performanceChart.data.datasets[0].backgroundColor = color + '20';
+    performanceChart.update();
+}
+
+// AI Insights and Analytics
+function updateAIInsights() {
+    // Simulate real-time AI analysis
+    const rsiStrength = Math.random() * 100;
+    const macdMomentum = Math.random() * 100;
+    const volatilityRisk = Math.random() * 100;
+    
+    // Update progress bars with animation
+    animateProgressBar('rsi-strength', rsiStrength);
+    animateProgressBar('macd-momentum', macdMomentum);
+    animateProgressBar('volatility-risk', volatilityRisk);
+    
+    // Generate AI recommendation
+    const recommendations = [
+        "Condiciones favorables para compra. RSI en zona de sobreventa.",
+        "MACD muestra divergencia alcista. Considerar posición larga.",
+        "Alta volatilidad detectada. Reducir tamaño de posición.",
+        "Tendencia lateral confirmada. Esperar breakout.",
+        "Momentum alcista fuerte. Mantener posiciones abiertas.",
+        "Señales mixtas. Usar stop-loss conservador."
+    ];
+    
+    const randomRecommendation = recommendations[Math.floor(Math.random() * recommendations.length)];
+    document.getElementById('ai-recommendation').textContent = randomRecommendation;
+    
+    // Update AI confidence
+    const confidence = Math.floor(75 + Math.random() * 20);
+    document.getElementById('ai-confidence').textContent = confidence + '%';
+    
+    // Update risk level
+    const riskLevels = ['Muy Bajo', 'Bajo', 'Medio', 'Alto'];
+    const riskLevel = riskLevels[Math.floor(volatilityRisk / 25)];
+    document.getElementById('risk-level').textContent = riskLevel;
+}
+
+function animateProgressBar(elementId, targetValue) {
+    const element = document.getElementById(elementId);
+    const currentValue = parseFloat(element.style.width) || 0;
+    const increment = (targetValue - currentValue) / 20;
+    
+    let current = currentValue;
+    const animation = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
+            current = targetValue;
+            clearInterval(animation);
+        }
+        element.style.width = current + '%';
+    }, 50);
+}
+
+function refreshSignals() {
+    fetch('/api/signals?limit=10')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.warn('API returned error:', data.error);
+                return;
+            }
+            
+            const tbody = document.getElementById('signals-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (Array.isArray(data)) {
+                data.forEach(signal => {
+                    const row = document.createElement('tr');
+                    const date = new Date(signal.timestamp);
+                    
+                    row.innerHTML = `
+                        <td>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</td>
+                        <td>
+                            <span class="badge ${signal.signal_type === 'buy' ? 'bg-success' : signal.signal_type === 'sell' ? 'bg-warning' : 'bg-secondary'}">
+                                ${signal.signal_type.toUpperCase()}
+                            </span>
+                        </td>
+                        <td>${signal.symbol}</td>
+                        <td>
+                            ${signal.amount ? (signal.signal_type === 'buy' ? '$' : '') + signal.amount + (signal.signal_type === 'buy' ? ' USDT' : '') : '-'}
+                        </td>
+                        <td>
+                            <span class="badge ${signal.status === 'success' ? 'bg-success' : signal.status === 'error' ? 'bg-danger' : signal.status === 'processing' ? 'bg-warning' : 'bg-secondary'}">
+                                ${signal.status.toUpperCase()}
+                            </span>
+                        </td>
+                        <td>
+                            ${signal.order_id ? `<code class="small">${signal.order_id}</code>` : '-'}
+                        </td>
+                        <td>
+                            ${signal.error_message ? `<span class="text-danger small" title="${signal.error_message}">${signal.error_message.substring(0, 50)}${signal.error_message.length > 50 ? '...' : ''}</span>` : '-'}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        })
+        .catch(error => {
+            console.warn('Error refreshing signals (this is normal if no signals exist):', error.message);
+        });
+}
+
+// Enhanced Auto-refresh with AI updates
+function refreshDashboard() {
+    refreshSignals();
+    updateAIInsights();
+    updateChart();
+}
+
+// Test Binance connection
+function testConnection() {
+    // Disable button during test
+    const button = event.target;
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+    
+    fetch('/test_binance_connection')
+        .then(response => response.json())
+        .then(data => {
+            // Show result
+            const alertType = data.success ? 'success' : 'danger';
+            const alertIcon = data.success ? 'check-circle' : 'exclamation-triangle';
+            
+            const alertHtml = `
+                <div class="alert alert-${alertType} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${alertIcon} me-2"></i>
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insert alert after the connection status card
+            const connectionCard = button.closest('.card');
+            connectionCard.insertAdjacentHTML('afterend', alertHtml);
+            
+            // Auto-remove alert after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-' + alertType);
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+            
+            // Reload page if connection successful to update all statuses
+            if (data.success) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+            
+            // Restore button
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error testing connection
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            const connectionCard = button.closest('.card');
+            connectionCard.insertAdjacentHTML('afterend', alertHtml);
+            
+            // Restore button
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        });
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    updateAIInsights();
+    
+    // Auto-refresh every 15 seconds
+    setInterval(refreshDashboard, 15000);
+});
+
+// Performance optimization for real-time updates
+let isUpdating = false;
+function optimizedUpdate() {
+    if (isUpdating) return;
+    isUpdating = true;
+    
+    refreshDashboard();
+    
+    setTimeout(() => {
+        isUpdating = false;
+    }, 1000);
+}
+</script>
+{% endblock %}
